@@ -1,18 +1,14 @@
-use std::{sync::Arc, thread};
+use std::cell::RefCell;
 
 fn main() {
-    let data = Arc::new("hello there world");
+    let data = RefCell::new(42);
 
-    let mut handles = vec![];
+    {
+        let mut data_ref_mut = data.borrow_mut();
+        *data_ref_mut += 1;
+    }
 
-    for i in 0..3 {
-        let data_clone = Arc::clone(&data);
-        let handle = thread::spawn(move || {
-            println!("Data in thread: {} - {}", data_clone, i);
-        });
-        handles.push(handle);
-    }
-    for handle in handles {
-        handle.join().unwrap();
-    }
+    let data_ref: std::cell::Ref<'_, i32> = data.borrow();
+
+    println!("DAta: {}", data_ref)
 }

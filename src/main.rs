@@ -17,5 +17,5 @@ fn main() {
 }
 
 fn take_ownership(data: Rc<&str>) {
-    println!("Data in function: {}", data);
+    println!("Data in function: {}  ", data);
 }
