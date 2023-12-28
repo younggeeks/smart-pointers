@@ -1,21 +1,27 @@
-use std::rc::Rc;
+use std::{
+    sync::{Arc, Mutex},
+    thread,
+};
 
 fn main() {
-    let data = Rc::new("Hello World!");
-    let data_clone = Rc::clone(&data);
-    let data_clone2 = Rc::clone(&data);
+    let counter = Arc::new(Mutex::new(0));
 
-    println!("Original: {}", data);
-    println!("Clone 1: {}", data_clone);
-    println!("Clone 2: {}", data_clone2);
+    let mut handles = vec![];
 
-    println!("Reference Count: {}", Rc::strong_count(&data));
+    for _ in 0..10 {
+        let counter_clone = Arc::clone(&counter);
 
-    take_ownership(data_clone);
+        let handle = thread::spawn(move || {
+            let mut num = counter_clone.lock().unwrap();
+            *num += 1;
+        });
 
-    println!("Reference Count: {}", Rc::strong_count(&data));
-}
+        handles.push(handle);
+    }
 
-fn take_ownership(data: Rc<&str>) {
-    println!("Data in function: {}  ", data);
+    for handle in handles {
+        handle.join().unwrap();
+    }
+
+    println!("Count: {}", *counter.lock().unwrap());
 }
